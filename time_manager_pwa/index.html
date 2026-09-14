@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d0d0d">
+<title>TIME MANAGER V10</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0d0d0d;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+.app{max-width:1100px;margin:auto;padding:22px}
+h1{font-size:21px;letter-spacing:.12em;margin:0 0 18px}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+button{border:0;border-radius:9px;padding:12px 16px;font-weight:700;cursor:pointer}
+button.main{background:#eee;color:#111}
+button.dark{background:#303030;color:#fff}
+button.red{background:#432020;color:#ffb5b5}
+.page{display:none}.page.on{display:block}
+.grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
+.panel{background:#191919;border:1px solid #333;border-radius:14px;padding:18px}
+.row{display:grid;grid-template-columns:1fr 62px 62px 42px;gap:7px;margin:8px 0}
+input{width:100%;padding:11px;border-radius:8px;border:1px solid #444;background:#0d0d0d;color:#fff}
+input[type=number]{text-align:center}
+.input-labels{display:grid;grid-template-columns:1fr 62px 62px 42px;gap:7px;color:#777;font-size:11px;text-align:center}
+.input-labels span:first-child{text-align:left}
+.section{display:grid;grid-template-columns:30px 1fr 75px;gap:8px;padding:11px 8px;border-bottom:1px solid #2d2d2d}
+.section.active{background:#292929;border-radius:8px}
+.num{color:#777}.stime{text-align:right;color:#aaa;font-variant-numeric:tabular-nums}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.hero{text-align:center}
+.name{font-size:23px;color:#aaa}
+.clock{font-size:100px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.clock.warn{color:#ffd166}
+.clock.over{color:#ff4d4d;animation:blink .7s step-end infinite}
+@keyframes blink{50%{opacity:.18}}
+.status{color:#888;font-size:13px}
+.bar{height:10px;background:#333;border-radius:9px;overflow:hidden;margin:18px 0}
+.fill{height:100%;background:#eee;transition:width .15s linear}
+.clock.over + .status{color:#ff4d4d}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#101010;border:1px solid #292929;border-radius:9px;padding:12px}
+.stat small{display:block;color:#777}.stat b{font-size:20px;font-variant-numeric:tabular-nums}
+.drift{font-size:30px;font-weight:800;margin:16px}.drift.overall-over{color:#ff4d4d;animation:blink .7s step-end infinite}.note{color:#888;font-size:13px}
+.total{display:flex;justify-content:space-between;color:#aaa;padding-top:13px}
+.big{font-size:18px;padding:15px 22px}
+.toggle{color:#999;font-size:13px;display:block;margin-top:12px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.clock{font-size:70px}.stats{grid-template-columns:1fr 1fr}.row,.input-labels{grid-template-columns:1fr 58px 58px 40px}}
+.adj{width:90px!important;min-width:90px}.fix{display:flex;align-items:center;gap:4px;white-space:nowrap}.fixcheck{width:auto!important}.row.head{font-size:12px;opacity:.7}</style>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#0b0f14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TIME MANAGER">
+
+</head>
+<body>
+<div class="app">
+<h1>TIME MANAGER / V10</h1>
+<div class="tabs"><button class="main" id="setupTab">進行表設定</button><button class="dark" id="liveTab">本番画面</button></div>
+
+<section class="page on" id="setup">
+<div class="grid">
+<div class="panel">
+<h3>セクション設定</h3>
+<div class="input-labels" style="display:grid;grid-template-columns:1fr 70px 70px 42px;gap:8px;align-items:center;margin-bottom:6px;"><span>セクション名</span><span>分</span><span>秒</span><span></span></div>
+<div id="editor"></div>
+<div class="actions"><button class="dark" id="add">＋ セクション追加</button><button class="main" id="demo">サンプル</button></div>
+<label class="toggle"><input type="checkbox" id="auto"> 0秒で自動的に次へ</label>
+</div>
+<div class="panel">
+<h3>進行表プレビュー</h3>
+<div id="preview"></div>
+<div class="total"><span>全体予定時間</span><b id="total">00:00</b></div>
+<div class="actions"><button class="main big" id="go">▶ 本番開始</button></div>
+</div>
+</div>
+</section>
+
+<section class="page" id="live">
+<div class="grid">
+<div class="panel">
+<h3>進行状況</h3>
+<div id="liveList"></div>
+<div class="total"><span>全体予定</span><b id="ltotal">00:00</b></div>
+<div class="total"><span>全体残り時間</span><b id="elapsed">00:00</b></div>
+</div>
+<div class="panel hero">
+<div class="name" id="name">未開始</div>
+<div class="clock" id="clock">00:00</div>
+<div class="status" id="status">待機中</div>
+<div class="bar"><div class="fill" id="fill"></div></div>
+<div class="stats">
+<div class="stat"><small>予定時間</small><b id="planned">00:00</b></div>
+<div class="stat"><small>実経過</small><b id="sectionElapsed">00:00</b></div>
+<div class="stat"><small>全体差分</small><b id="sectionDrift">±00:00</b></div>
+</div>
+<div class="drift" id="overall">全体残り 00:00</div>
+<div class="note" id="note">予定通り</div>
+<div class="actions" style="justify-content:center">
+<button class="main big" id="start">▶ スタート</button>
+<button class="dark" id="prev">← 前へ</button>
+<button class="dark" id="next">次へ →</button>
+<button class="red" id="reset">リセット</button>
+</div>
+<div class="actions" style="justify-content:center"><button class="dark" id="edit">⚙ 進行表を編集</button></div>
+</div>
+</div>
+</section>
+</div>
+
+<script>
+let S=[
+["オープニング",300],
+["セクション1",600],
+["セクション2",900],
+["セクション3",480],
+["エンディング",180]
+],i=0,left=0,running=false,timer=null,before=0;
+
+const $=x=>document.getElementById(x);
+const fmt=s=>{
+ s=Math.max(0,Math.round(s));
+ return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")
+};
+const signed=s=>(s>0?"+":s<0?"−":"±")+fmt(Math.abs(s));
+const total=()=>S.reduce((a,x)=>a+x[1],0);
+
+
+function rememberPlannedTimes(){
+  S.forEach(s => s._oldPlanned = s[1]);
+}
+
+function effectiveTime(s){
+  return Math.max(1, Number(s[1]) || 0);
+}
+
+function draw(){
+  $("editor").innerHTML=S.map((x,n)=>{
+    const base=Math.max(1,Number(x[1])||0);
+    const min=Math.floor(base/60);
+    const sec=base%60;
+
+    return `<div class="row" style="display:grid;grid-template-columns:1fr 70px 70px 42px;gap:8px;align-items:center">
+      <input value="${String(x[0]).replace(/"/g,"&quot;")}" oninput="updateSection(${n})">
+      <input class="min" type="number" min="0" value="${min}" oninput="updateSection(${n})" onclick="this.select()" onfocus="this.select()">
+      <input class="sec" type="number" min="0" max="59" value="${String(sec).padStart(2,"0")}" oninput="updateSection(${n})" onclick="this.select()" onfocus="this.select()">
+      <button class="red" onclick="S.splice(${n},1);i=Math.min(i,Math.max(0,S.length-1));reset();draw()">×</button>
+    </div>`
+  }).join("");
+
+  $("preview").innerHTML=S.map((x,n)=>
+    `<div class="section ${n===i?"active":""}">
+      <span class="num">${n+1}</span><span>${x[0]}</span><span class="stime">${fmt(effectiveTime(x))}</span>
+    </div>`).join("");
+
+  $("total").textContent=fmt(total());
+
+  $("liveList").innerHTML=S.map((x,n)=>
+    `<div class="section ${n===i?"active":""}">
+      <span class="num">${n+1}</span><span>${x[0]}</span><span class="stime">${fmt(effectiveTime(x))}</span>
+    </div>`).join("");
+  $("ltotal").textContent=fmt(total());
+
+  live();
+}
+function updateSection(n){
+  const row=document.querySelectorAll("#editor .row")[n];
+  if(!row || !S[n]) return;
+
+  const inputs=row.querySelectorAll("input");
+  const oldPlanned=effectiveTime(S[n]);
+
+  const name=inputs[0].value;
+  const min=Math.max(0,Number(inputs[1].value)||0);
+  const sec=Math.max(0,Math.min(59,Number(inputs[2].value)||0));
+  const newPlanned=Math.max(1,min*60+sec);
+
+  S[n][0]=name;
+  S[n][1]=newPlanned;
+
+  if(n===i){
+    const elapsed=Math.max(0,oldPlanned-left);
+    left=newPlanned-elapsed;
+  }
+
+  // 入力中にエディタを再描画しない
+  updatePreview();
+  live();
+}
+
+function updatePreview(){
+  if($("preview")){
+    $("preview").innerHTML=S.map((x,n)=>
+      `<div class="section ${n===i?"active":""}">
+        <span class="num">${n+1}</span><span>${x[0]}</span><span class="stime">${fmt(effectiveTime(x))}</span>
+      </div>`).join("");
+  }
+  if($("liveList")){
+    $("liveList").innerHTML=S.map((x,n)=>
+      `<div class="section ${n===i?"active":""}">
+        <span class="num">${n+1}</span><span>${x[0]}</span><span class="stime">${fmt(effectiveTime(x))}</span>
+      </div>`).join("");
+  }
+  if($("total")) $("total").textContent=fmt(total());
+  if($("ltotal")) $("ltotal").textContent=fmt(total());
+}
+function live(){
+ if(!S.length){
+  $("name").textContent="セクションなし";
+  $("clock").textContent="00:00";
+  $("elapsed").textContent="00:00";
+  $("overall").textContent="全体残り 00:00";
+  return;
+ }
+
+ const p=effectiveTime(S[i]);
+ const elapsedSection=Math.max(0,p-left);
+ const overtime=Math.max(0,-left);
+
+ const plannedElapsed=S.slice(0,i).reduce((sum,x)=>sum+effectiveTime(x),0)
+   + Math.min(elapsedSection,p);
+ const allElapsed=before+elapsedSection;
+ const overallDrift=allElapsed-plannedElapsed;
+ const overallRemaining=total()-allElapsed;
+
+ $("name").textContent=S[i][0];
+ $("clock").textContent=left<0?"-"+fmt(overtime):fmt(left);
+ $("planned").textContent=fmt(p);
+ $("sectionElapsed").textContent=fmt(elapsedSection);
+ $("sectionDrift").textContent=signed(overallDrift);
+
+ $("elapsed").textContent=overallRemaining<0
+   ? "-"+fmt(Math.abs(overallRemaining))
+   : fmt(overallRemaining);
+
+ $("overall").textContent=overallRemaining<0
+   ? "全体残り -"+fmt(Math.abs(overallRemaining))
+   : "全体残り "+fmt(overallRemaining);
+
+ if(overtime>0){
+   $("note").textContent="予定時間超過";
+   $("status").textContent="オーバーラン";
+ }else{
+   $("note").textContent=overallRemaining<0
+     ? "全体予定時間を超過"
+     : "全体残り "+fmt(overallRemaining);
+   $("status").textContent=running?"進行中":"待機中";
+ }
+
+ $("fill").style.width=(p?Math.max(0,Math.min(1,left/p))*100:0)+"%";
+
+ const clock=$("clock");
+ clock.className="clock";
+ if(left>0 && left<=30) clock.classList.add("warn");
+ if(left<0) clock.classList.add("over");
+
+ const overall=$("overall");
+ overall.classList.toggle("overall-over",overallRemaining<0);
+}
+function stop(){
+ if(!running)return;
+ const elapsed=(performance.now()-runStartedAt)/1000;
+ left=runBaseLeft-elapsed;
+ clearInterval(timer);
+ timer=null;
+ running=false;
+ $("start").textContent="▶ スタート";
+ live();
+}
+
+function reset(){
+  runStartedAt=0; runBaseLeft=0;
+ stop();
+ left=S.length?effectiveTime(S[i]):0;
+ before=0;
+ $("status").textContent="待機中";
+ draw();
+}
+
+function beep(){
+ try{
+  let c=new(window.AudioContext||window.webkitAudioContext),
+      o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);
+  o.frequency.value=880;g.gain.value=.08;
+  o.start();o.stop(c.currentTime+.3);
+ }catch(e){}
+}
+
+function start(){
+ if(!S.length)return;
+ if(running){
+   stop();
+   $("status").textContent="一時停止";
+   return;
+ }
+ running=true;
+ runStartedAt=performance.now();
+ runBaseLeft=left;
+ $("start").textContent="Ⅱ 一時停止";
+ $("status").textContent="進行中";
+ live();
+
+ timer=setInterval(()=>{
+   const elapsed=(performance.now()-runStartedAt)/1000;
+   left=runBaseLeft-elapsed;
+   live();
+
+   if(left<=0 && $("auto").checked && i<S.length-1){
+     beep();
+     before+=effectiveTime(S[i]);
+     i++;
+     left=effectiveTime(S[i]);
+     runStartedAt=performance.now();
+     runBaseLeft=left;
+     $("status").textContent="次セクション";
+     draw();
+   }
+ },100);
+}
+
+
+
+function move(d){
+ const wasRunning=running;
+
+ if(running){
+   const elapsed=(performance.now()-runStartedAt)/1000;
+   left=runBaseLeft-elapsed;
+   clearInterval(timer);
+   timer=null;
+   running=false;
+ }
+
+ if(!S.length)return;
+
+ const oldIndex=i;
+ const oldPlanned=effectiveTime(S[oldIndex]);
+ const oldElapsed=Math.max(0,oldPlanned-left);
+
+ if(d>0){
+   before += oldElapsed;
+ }else if(d<0){
+   before=Math.max(0,before-oldPlanned);
+ }
+
+ i=Math.max(0,Math.min(S.length-1,i+d));
+ left=effectiveTime(S[i]);
+
+ if(wasRunning){
+   $("status").textContent="進行中";
+   running=true;
+   runStartedAt=performance.now();
+   runBaseLeft=left;
+   $("start").textContent="Ⅱ 一時停止";
+
+   timer=setInterval(()=>{
+     const elapsed=(performance.now()-runStartedAt)/1000;
+     left=runBaseLeft-elapsed;
+     live();
+
+     if(left<=0 && $("auto").checked && i<S.length-1){
+       beep();
+       before+=effectiveTime(S[i]);
+       i++;
+       left=effectiveTime(S[i]);
+       runStartedAt=performance.now();
+       runBaseLeft=left;
+       $("status").textContent="次セクション";
+       draw();
+     }
+   },100);
+ }else{
+   $("status").textContent="待機中";
+ }
+
+ draw();
+ live();
+}
+
+function page(isLive){
+ $("setup").className="page "+(!isLive?"on":"");
+ $("live").className="page "+(isLive?"on":"");
+ $("setupTab").className=isLive?"dark":"main";
+ $("liveTab").className=isLive?"main":"dark";
+}
+
+$("add").onclick=()=>{
+ S.push(["新しいセクション",300]);
+ i=S.length-1;
+ reset();
+ draw();
+};
+
+$("demo").onclick=()=>{
+ S=[
+  ["オープニング",305],
+  ["セクション1",630],
+  ["セクション2",845],
+  ["セクション3",515],
+  ["エンディング",195]
+ ];
+ i=0;
+ reset();
+};
+
+$("go").onclick=()=>{
+ reset();
+ page(true);
+};
+
+$("start").onclick=start;
+$("prev").onclick=()=>move(-1);
+$("next").onclick=()=>move(1);
+$("reset").onclick=reset;
+$("edit").onclick=()=>page(false);
+$("setupTab").onclick=()=>page(false);
+$("liveTab").onclick=()=>page(true);
+
+reset();
+</script>
+
+<script>
+if ("serviceWorker" in navigator && (location.protocol === "http:" || location.protocol === "https:")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
