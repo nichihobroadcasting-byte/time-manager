@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0d0d0d">
-<title>TIME MANAGER V10</title>
+<title>TIME MANAGER V17</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0d;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
@@ -45,19 +45,71 @@ input[type=number]{text-align:center}
 .big{font-size:18px;padding:15px 22px}
 .toggle{color:#999;font-size:13px;display:block;margin-top:12px}
 @media(max-width:800px){.grid{grid-template-columns:1fr}.clock{font-size:70px}.stats{grid-template-columns:1fr 1fr}.row,.input-labels{grid-template-columns:1fr 58px 58px 40px}}
-.adj{width:90px!important;min-width:90px}.fix{display:flex;align-items:center;gap:4px;white-space:nowrap}.fixcheck{width:auto!important}.row.head{font-size:12px;opacity:.7}</style>
+.adj{width:90px!important;min-width:90px}.fix{display:flex;align-items:center;gap:4px;white-space:nowrap}.fixcheck{width:auto!important}.row.head{font-size:12px;opacity:.7}
+/* V17: smartphone landscape operation layout */
+@media (orientation: landscape) and (max-width: 950px) {
+  body{overflow:hidden}
+  .app{padding:8px 10px;max-width:none;height:100vh}
+  h1{font-size:14px;margin:0 0 5px;letter-spacing:.08em}
+  .tabs{gap:5px;margin-bottom:6px}
+  .tabs button{padding:7px 11px;border-radius:7px;font-size:12px}
+  .grid{grid-template-columns:minmax(220px,38%) minmax(0,1fr);gap:8px}
+  .panel{padding:9px;border-radius:10px}
+  #live .grid{height:calc(100vh - 58px)}
+  #live .panel{min-height:0}
+  #live .panel:first-child{overflow:auto}
+  #live .hero{display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden}
+  .hero .name{font-size:17px;line-height:1.15;margin-bottom:1px}
+  .hero .clock{font-size:clamp(52px,16vh,72px);line-height:.98;margin:0 0 1px}
+  .hero .status{font-size:11px;line-height:1.1}
+  .hero .bar{height:7px;margin:7px 0}
+  .stats{gap:5px}
+  .stat{padding:6px 7px;border-radius:7px}
+  .stat small{font-size:10px}
+  .stat b{font-size:15px}
+  .drift{font-size:20px;margin:7px 0 2px;line-height:1.05}
+  .note{font-size:10px;line-height:1.1;min-height:12px}
+  .hero .actions{gap:5px;margin-top:6px;flex-wrap:nowrap}
+  .hero .actions button{padding:8px 7px;font-size:12px;white-space:nowrap;min-width:0;flex:1}
+  .hero .actions:last-child{margin-top:5px}
+  .hero .actions:last-child button{flex:0 1 auto;padding:7px 12px}
+  #liveList .section{grid-template-columns:22px 1fr 55px;padding:7px 5px;font-size:12px}
+  #live .total{padding-top:6px;font-size:11px}
+  #live .total b{font-size:13px}
+}
 
+/* Extra-tight landscape phones: keep the entire control strip visible. */
+@media (orientation: landscape) and (max-width: 700px) {
+  h1{display:none}
+  .tabs{margin-bottom:5px}
+  #live .grid{height:calc(100vh - 38px)}
+  .grid{grid-template-columns:34% 66%;gap:6px}
+  .panel{padding:7px}
+  .hero .clock{font-size:clamp(44px,15vh,60px)}
+  .hero .name{font-size:14px}
+  .hero .bar{margin:4px 0;height:5px}
+  .stat{padding:4px 5px}
+  .stat small{font-size:9px}
+  .stat b{font-size:13px}
+  .drift{font-size:17px;margin:5px 0 1px}
+  .note{display:none}
+  .hero .actions{margin-top:4px;gap:3px}
+  .hero .actions button{padding:7px 4px;font-size:11px}
+  .hero .actions:last-child{margin-top:3px}
+  .hero .actions:last-child button{padding:6px 9px;font-size:10px}
+}
+
+</style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#0b0f14">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TIME MANAGER">
-
 </head>
 <body>
 <div class="app">
-<h1>TIME MANAGER / V10</h1>
+<h1>TIME MANAGER / V17</h1>
 <div class="tabs"><button class="main" id="setupTab">進行表設定</button><button class="dark" id="liveTab">本番画面</button></div>
 
 <section class="page on" id="setup">
@@ -421,14 +473,14 @@ $("liveTab").onclick=()=>page(true);
 
 reset();
 </script>
-
 <script>
-if ("serviceWorker" in navigator && (location.protocol === "http:" || location.protocol === "https:")) {
+if ("serviceWorker" in navigator &&
+    (location.protocol === "http:" || location.protocol === "https:")) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
+    navigator.serviceWorker.register("./sw.js")
+      .catch(err => console.warn("Offline cache registration failed:", err));
   });
 }
 </script>
-
 </body>
 </html>

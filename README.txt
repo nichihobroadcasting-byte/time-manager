@@ -1,18 +1,12 @@
-TIME MANAGER PWA
+TIME MANAGER PWA V18
 
-このフォルダはV16をベースにしたPWA版です。
+V17の横向きスマホレイアウトをベースに、オフライン利用を確実にするためのPWA設定を強化した版です。
 
-重要:
-PWAのインストールにはHTTPSまたはlocalhostが必要です。
-VS Code + Live Serverでこのフォルダのindex.htmlを開けば、PWAとしてインストールできます。
+オフライン利用:
+1. HTTPSのURLで一度TIME MANAGERを開く
+2. 少し待ってからホーム画面のTIME MANAGERを起動
+3. 機内モード等で通信を切ってもアプリ本体を起動できます
 
-Chrome / Edge:
-1. Live Serverでindex.htmlを開く
-2. ブラウザのアドレスバー右側の「インストール」アイコン、またはメニューから「アプリとしてインストール」
-3. TIME MANAGERをインストール
-
-Safari:
-PWAとしてのインストール方法はSafariの「ファイル」/共有メニュー等の環境により異なります。
-
-オフライン:
-一度オンラインでPWAを起動すると、アプリ本体はキャッシュされ、以後はオフラインでも起動できます。
+注意:
+GitHub PagesのURLを開いて一度読み込むことが必要です。
+その後はアプリ本体（HTML/CSS/JS/アイコン等）がキャッシュされます。
