@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0d0d0d">
-<title>TIME MANAGER V23</title>
+<title>TIME MANAGER V26</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0d;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
@@ -173,6 +173,43 @@ input[type=number]{text-align:center}
   #setup .panel{padding:8px}
 }
 
+
+/* V26:本番画面・スマホ横画面はスクロール完全禁止。画面内完結を最優先。 */
+@media (orientation: landscape) and (max-width: 950px){
+  body.live-mode{overflow:hidden;height:100dvh}
+  body.live-mode .app{height:100dvh;min-height:0;overflow:hidden;padding:8px 10px}
+  body.live-mode #live{height:calc(100dvh - 58px);min-height:0;overflow:hidden}
+  body.live-mode #live .live-focus{height:100%;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center}
+  body.live-mode #live .wall-clock{flex:0 0 auto}
+  body.live-mode #live .name{flex:0 0 auto}
+  body.live-mode #live .clock{flex:0 0 auto}
+  body.live-mode #live .status{flex:0 0 auto}
+  body.live-mode #live .wall-info{flex:0 0 auto}
+  body.live-mode #live .stats{flex:0 0 auto}
+  body.live-mode #live .drift{flex:0 0 auto}
+  body.live-mode #live .actions{flex:0 0 auto}
+}
+@media (orientation: landscape) and (max-width: 700px){
+  body.live-mode .app{padding:5px 7px}
+  body.live-mode .tabs{margin-bottom:4px}
+  body.live-mode #live{height:calc(100dvh - 38px)}
+  body.live-mode #live .live-focus{padding:3px 5px}
+  body.live-mode #live .wall-clock{font-size:clamp(17px,4.2vh,24px);margin:0 0 1px;line-height:1}
+  body.live-mode #live .name{font-size:clamp(13px,3.5vh,17px);line-height:1.05;margin:0}
+  body.live-mode #live .clock{font-size:clamp(48px,17vh,82px);line-height:.9;margin:1px 0}
+  body.live-mode #live .status{font-size:9px;line-height:1;margin:0}
+  body.live-mode #live .wall-info{font-size:9px;line-height:1;margin:2px 0 0}
+  body.live-mode #live .stats{width:100%;max-width:520px;gap:3px;margin:3px auto 0}
+  body.live-mode #live .stat{padding:3px 4px;border-radius:6px}
+  body.live-mode #live .stat small{font-size:8px;line-height:1}
+  body.live-mode #live .stat b{font-size:12px;line-height:1.05}
+  body.live-mode #live .drift{font-size:15px;line-height:1;margin:3px 0 1px}
+  body.live-mode #live .actions{width:100%;max-width:520px;gap:3px;margin-top:3px;flex-wrap:nowrap}
+  body.live-mode #live .actions button{padding:6px 4px;font-size:10px;min-height:30px;line-height:1.05}
+  body.live-mode #live .actions:last-child{margin-top:2px}
+  body.live-mode #live .actions:last-child button{padding:5px 8px;font-size:9px;min-height:26px}
+}
+
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#0b0f14">
@@ -183,7 +220,7 @@ input[type=number]{text-align:center}
 </head>
 <body>
 <div class="app">
-<h1>TIME MANAGER / V25</h1>
+<h1>TIME MANAGER / V26</h1>
 <div class="tabs"><button class="main" id="setupTab">進行表設定</button><button class="dark" id="liveTab">本番画面</button></div>
 
 <section class="page on" id="setup">
@@ -560,10 +597,12 @@ function move(d){
 }
 
 function page(isLive){
+ document.body.classList.toggle("live-mode",isLive);
  $("setup").className="page "+(!isLive?"on":"");
  $("live").className="page "+(isLive?"on":"");
  $("setupTab").className=isLive?"dark":"main";
  $("liveTab").className=isLive?"main":"dark";
+ if(isLive){ updateCurrentTime(); live(); }
 }
 
 $("add").onclick=()=>{

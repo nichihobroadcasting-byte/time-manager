@@ -1,4 +1,4 @@
-const CACHE = 'time-manager-v25';
+const CACHE = 'time-manager-v26';
 const ASSETS = ['./','./index.html','./manifest.webmanifest','./icon.svg','./sw.js'];
 
 self.addEventListener('install', event => {
