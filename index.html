@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0d0d0d">
-<title>TIME MANAGER V23</title>
+<title>TIME MANAGER V24</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0d;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
@@ -165,7 +165,7 @@ input[type=number]{text-align:center}
 </head>
 <body>
 <div class="app">
-<h1>TIME MANAGER / V23</h1>
+<h1>TIME MANAGER / V24</h1>
 <div class="tabs"><button class="main" id="setupTab">進行表設定</button><button class="dark" id="liveTab">本番画面</button></div>
 
 <section class="page on" id="setup">
@@ -592,9 +592,19 @@ reset();
 <script>
 if ("serviceWorker" in navigator &&
     (location.protocol === "http:" || location.protocol === "https:")) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js")
-      .catch(err => console.warn("Offline cache registration failed:", err));
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!window.__tmSwReloaded) {
+      window.__tmSwReloaded = true;
+      location.reload();
+    }
+  });
+  window.addEventListener("load", async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" });
+      await reg.update();
+    } catch (err) {
+      console.warn("Offline cache registration failed:", err);
+    }
   });
 }
 </script>

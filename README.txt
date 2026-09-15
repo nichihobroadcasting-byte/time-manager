@@ -1,13 +1,4 @@
-TIME MANAGER PWA V20
-
-V19の最優先改善をさらに修正した版です。
-
-- 横画面のSETUP画面を明示的に高さ固定
-- 進行表設定パネルを縦スクロール可能に
-- iPhone/Androidのタッチスクロールを考慮
-- 「＋ セクション追加」を下部に固定
-- セクション削除
-- ↑ / ↓で並び替え
-- PWA / オフライン対応
-
-V20ではタイマー計算ロジックは変更していません。
+TIME MANAGER V24
+PWA version with improved Service Worker update handling.
+GitHub Pages: upload all files to repository root.
+After updating GitHub Pages, open the site once in the phone browser. The PWA should update its app shell automatically.
