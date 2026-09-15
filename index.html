@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0d0d0d">
-<title>TIME MANAGER V19</title>
+<title>TIME MANAGER V21</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0d;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
@@ -18,10 +18,10 @@ button.red{background:#432020;color:#ffb5b5}
 .page{display:none}.page.on{display:block}
 .grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
 .panel{background:#191919;border:1px solid #333;border-radius:14px;padding:18px}
-.row{display:grid;grid-template-columns:minmax(0,1fr) 62px 62px 88px;gap:7px;margin:8px 0}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 58px 58px 108px;gap:8px;margin:8px 0}
 input{width:100%;padding:11px;border-radius:8px;border:1px solid #444;background:#0d0d0d;color:#fff}
 input[type=number]{text-align:center}
-.input-labels{display:grid;grid-template-columns:minmax(0,1fr) 62px 62px 88px;gap:7px;color:#777;font-size:11px;text-align:center}
+.input-labels{display:grid;grid-template-columns:minmax(0,1fr) 58px 58px 108px;gap:8px;color:#777;font-size:11px;text-align:center}
 .input-labels span:first-child{text-align:left}
 .section{display:grid;grid-template-columns:30px 1fr 75px;gap:8px;padding:11px 8px;border-bottom:1px solid #2d2d2d}
 .section.active{background:#292929;border-radius:8px}
@@ -50,25 +50,27 @@ input[type=number]{text-align:center}
 /* V19: field-use priority fixes */
 .setup-panel{min-height:0}
 .row-actions{display:flex;gap:4px;justify-content:flex-end}
-.row-actions button{padding:7px 7px;font-size:12px;min-width:24px}
-.setup-actions{position:sticky;bottom:0;z-index:5;background:#191919;padding-top:8px}
+.row-actions{min-width:108px;align-items:center}.row-actions button{padding:8px 9px;font-size:12px;min-width:30px;height:36px}
+.save-area{margin-top:14px;padding-top:12px;border-top:1px solid #2d2d2d}.save-area .save-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}.save-area input{min-width:0}.save-list{margin-top:8px;color:#aaa;font-size:12px}.save-list select{width:100%;padding:9px;border-radius:8px;border:1px solid #444;background:#0d0d0d;color:#fff}.setup-actions{position:sticky;bottom:0;z-index:5;background:#191919;padding-top:8px}
 @media (orientation: landscape) and (max-width: 950px) {
-  #setup .grid{height:calc(100vh - 58px);min-height:0}
-  #setup .panel{min-height:0}
-  #setup .panel:first-child{overflow:auto;overscroll-behavior:contain}
-  #setup .panel:nth-child(2){overflow:auto;overscroll-behavior:contain}
+  #setup{height:calc(100vh - 58px);overflow:hidden}
+  #setup .grid{height:100%;min-height:0;overflow:hidden}
+  #setup .grid>.panel{min-height:0;min-width:0}
+  #setup .panel:first-child{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  #setup .panel:nth-child(2){overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   #setup .input-labels{grid-template-columns:minmax(0,1fr) 58px 58px 88px;gap:6px}
   #setup .row{grid-template-columns:minmax(0,1fr) 58px 58px 88px;gap:6px}
-  #setup .row-actions button{padding:6px 7px;font-size:11px}
+  #setup .row-actions button{padding:6px 7px;font-size:11px;min-width:30px;height:34px}
 }
 @media (orientation: landscape) and (max-width: 700px) {
-  #setup .grid{height:calc(100vh - 38px)}
-  #setup .panel{padding:7px}
-  #setup .input-labels{grid-template-columns:minmax(0,1fr) 52px 52px 80px;gap:4px;font-size:10px}
-  #setup .row{grid-template-columns:minmax(0,1fr) 52px 52px 80px;gap:4px}
+  #setup{height:calc(100vh - 38px);overflow:hidden}
+  #setup .grid{height:100%;min-height:0;overflow:hidden}
+  #setup .panel{padding:7px;min-height:0}
+  #setup .input-labels{grid-template-columns:minmax(0,1fr) 50px 50px 92px;gap:4px;font-size:10px}
+  #setup .row{grid-template-columns:minmax(0,1fr) 50px 50px 92px;gap:4px}
   #setup .row input{padding:8px 5px;font-size:12px}
   #setup .row-actions{gap:2px}
-  #setup .row-actions button{padding:6px 5px;min-width:24px}
+  #setup .row-actions{min-width:92px;gap:3px} #setup .row-actions button{padding:5px 5px;min-width:27px;height:32px}
   #setup .setup-actions button{padding:7px 9px;font-size:11px}
 }
 
@@ -135,17 +137,27 @@ input[type=number]{text-align:center}
 </head>
 <body>
 <div class="app">
-<h1>TIME MANAGER / V19</h1>
+<h1>TIME MANAGER / V21</h1>
 <div class="tabs"><button class="main" id="setupTab">進行表設定</button><button class="dark" id="liveTab">本番画面</button></div>
 
 <section class="page on" id="setup">
 <div class="grid">
 <div class="panel setup-panel">
-<h3>セクション設定</h3>
-<div class="input-labels" style="display:grid;grid-template-columns:1fr 70px 70px 42px;gap:8px;align-items:center;margin-bottom:6px;"><span>セクション名</span><span>分</span><span>秒</span><span></span></div>
+<h3>セクション設定 <span style="font-size:11px;color:#777;font-weight:400">↓ スクロール可</span></h3>
+<div class="input-labels" style="align-items:center;margin-bottom:6px;"><span>セクション名</span><span>分</span><span>秒</span><span>操作</span></div>
 <div id="editor"></div>
 <div class="actions setup-actions"><button class="dark" id="add">＋ セクション追加</button><button class="main" id="demo">サンプル</button></div>
 <label class="toggle"><input type="checkbox" id="auto"> 0秒で自動的に次へ</label>
+<div class="save-area">
+  <div style="font-weight:700;margin-bottom:7px">進行表を保存</div>
+  <div class="save-row">
+    <input id="programName" placeholder="番組名・進行表名">
+    <button class="main" id="saveBtn">保存</button>
+    <button class="dark" id="loadBtn">読み込み</button>
+    <button class="red" id="deleteBtn">削除</button>
+  </div>
+  <div class="save-list"><select id="savedList"><option value="">保存した進行表を選択</option></select></div>
+</div>
 </div>
 <div class="panel">
 <h3>進行表プレビュー</h3>
@@ -167,7 +179,7 @@ input[type=number]{text-align:center}
 <div class="panel hero">
 <div class="name" id="name">未開始</div>
 <div class="clock" id="clock">00:00</div>
-<div class="status" id="status">待機中</div>
+<div class="status" id="status">待機中</div><div class="status" id="wallInfo" style="margin-top:5px">現在時刻 --:-- ｜ 予定終了 --:--</div>
 <div class="bar"><div class="fill" id="fill"></div></div>
 <div class="stats">
 <div class="stat"><small>予定時間</small><b id="planned">00:00</b></div>
@@ -212,6 +224,42 @@ function rememberPlannedTimes(){
 
 function effectiveTime(s){
   return Math.max(1, Number(s[1]) || 0);
+}
+
+function refreshSavedList(){
+  const list=$("savedList"); if(!list) return;
+  const data=JSON.parse(localStorage.getItem("time_manager_programs_v1")||"{}");
+  list.innerHTML='<option value="">保存した進行表を選択</option>'+Object.keys(data).sort().map(k=>`<option value="${k.replace(/"/g,"&quot;")}">${k}</option>`).join("");
+}
+function saveProgram(){
+  const name=($("programName").value||"").trim();
+  if(!name){ alert("番組名・進行表名を入力してください"); $("programName").focus(); return; }
+  const data=JSON.parse(localStorage.getItem("time_manager_programs_v1")||"{}");
+  data[name]={sections:S.map(x=>[x[0],effectiveTime(x)]),auto:$("auto").checked,savedAt:new Date().toISOString()};
+  localStorage.setItem("time_manager_programs_v1",JSON.stringify(data));
+  refreshSavedList(); $("savedList").value=name; alert("「"+name+"」を保存しました");
+}
+function loadProgram(){
+  const name=$("savedList").value; if(!name) return;
+  const data=JSON.parse(localStorage.getItem("time_manager_programs_v1")||"{}");
+  if(!data[name]) return;
+  reset(); S=data[name].sections.map(x=>[String(x[0]),Math.max(1,Number(x[1])||1)]); i=0; $("auto").checked=!!data[name].auto; $("programName").value=name; draw();
+}
+function deleteProgram(){
+  const name=$("savedList").value; if(!name) return;
+  const data=JSON.parse(localStorage.getItem("time_manager_programs_v1")||"{}");
+  if(!data[name]) return;
+  if(!confirm("「"+name+"」を削除しますか？")) return;
+  delete data[name]; localStorage.setItem("time_manager_programs_v1",JSON.stringify(data)); refreshSavedList();
+}
+function updateWallInfo(){
+  const el=$("wallInfo"); if(!el) return;
+  const now=new Date();
+  const t=now.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const remaining=Math.max(0,total()-(before+Math.max(0,effectiveTime(S[i])-left)));
+  const end=new Date(now.getTime()+remaining*1000);
+  const e=end.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  el.textContent=`現在時刻 ${t} ｜ 予定終了 ${e}`;
 }
 
 function draw(){
@@ -314,6 +362,7 @@ function updatePreview(){
   if($("ltotal")) $("ltotal").textContent=fmt(total());
 }
 function live(){
+ updateWallInfo();
  if(!S.length){
   $("name").textContent="セクションなし";
   $("clock").textContent="00:00";
@@ -523,6 +572,11 @@ $("prev").onclick=()=>move(-1);
 $("next").onclick=()=>move(1);
 $("reset").onclick=reset;
 $("edit").onclick=()=>page(false);
+$("saveBtn").onclick=saveProgram;
+$("loadBtn").onclick=loadProgram;
+$("deleteBtn").onclick=deleteProgram;
+$("savedList").onchange=loadProgram;
+refreshSavedList();
 $("setupTab").onclick=()=>page(false);
 $("liveTab").onclick=()=>page(true);
 

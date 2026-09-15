@@ -1,7 +1,7 @@
 {
   "name": "TIME MANAGER",
   "short_name": "TIME MANAGER",
-  "description": "テレビ・FD現場向け進行管理タイマー V19",
+  "description": "テレビ・FD現場向け進行管理タイマー V20",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
