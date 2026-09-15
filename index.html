@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0d0d0d">
-<title>TIME MANAGER V21</title>
+<title>TIME MANAGER V22</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0d;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
@@ -54,7 +54,7 @@ input[type=number]{text-align:center}
 .save-area{margin-top:14px;padding-top:12px;border-top:1px solid #2d2d2d}.save-area .save-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}.save-area input{min-width:0}.save-list{margin-top:8px;color:#aaa;font-size:12px}.save-list select{width:100%;padding:9px;border-radius:8px;border:1px solid #444;background:#0d0d0d;color:#fff}.setup-actions{position:sticky;bottom:0;z-index:5;background:#191919;padding-top:8px}
 @media (orientation: landscape) and (max-width: 950px) {
   #setup{height:calc(100vh - 58px);overflow:hidden}
-  #setup .grid{height:100%;min-height:0;overflow:hidden}
+  #setup .grid{height:100%;min-height:0;overflow:hidden;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   #setup .grid>.panel{min-height:0;min-width:0}
   #setup .panel:first-child{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   #setup .panel:nth-child(2){overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
@@ -64,7 +64,7 @@ input[type=number]{text-align:center}
 }
 @media (orientation: landscape) and (max-width: 700px) {
   #setup{height:calc(100vh - 38px);overflow:hidden}
-  #setup .grid{height:100%;min-height:0;overflow:hidden}
+  #setup .grid{height:100%;min-height:0;overflow:hidden;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   #setup .panel{padding:7px;min-height:0}
   #setup .input-labels{grid-template-columns:minmax(0,1fr) 50px 50px 92px;gap:4px;font-size:10px}
   #setup .row{grid-template-columns:minmax(0,1fr) 50px 50px 92px;gap:4px}
@@ -72,6 +72,30 @@ input[type=number]{text-align:center}
   #setup .row-actions{gap:2px}
   #setup .row-actions{min-width:92px;gap:3px} #setup .row-actions button{padding:5px 5px;min-width:27px;height:32px}
   #setup .setup-actions button{padding:7px 9px;font-size:11px}
+}
+
+/* V22:本番画面はカウント優先 */
+.live-focus{min-height:0;text-align:center}
+.wall-info{margin-top:5px}
+@media (orientation: landscape) and (max-width: 950px){
+  #live{height:calc(100vh - 58px);overflow:hidden}
+  #live .live-focus{height:100%;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+  #live .clock{font-size:clamp(70px,22vh,120px)}
+  #live .stats{width:min(760px,100%);margin:8px auto 0}
+  #live .drift{margin:10px 0 4px}
+}
+@media (orientation: landscape) and (max-width: 700px){
+  #live{height:calc(100vh - 38px)}
+  #live .live-focus{padding:7px}
+  #live .clock{font-size:clamp(58px,20vh,92px)}
+  #live .name{font-size:16px}
+  #live .status{font-size:10px}
+  #live .wall-info{margin-top:3px}
+  #live .stats{gap:4px;margin-top:5px}
+  #live .stat{padding:5px}
+  #live .stat small{font-size:9px}
+  #live .stat b{font-size:13px}
+  #live .drift{font-size:18px;margin:5px 0 2px}
 }
 
 /* V18: smartphone landscape operation + offline PWA */
@@ -137,7 +161,7 @@ input[type=number]{text-align:center}
 </head>
 <body>
 <div class="app">
-<h1>TIME MANAGER / V21</h1>
+<h1>TIME MANAGER / V22</h1>
 <div class="tabs"><button class="main" id="setupTab">進行表設定</button><button class="dark" id="liveTab">本番画面</button></div>
 
 <section class="page on" id="setup">
@@ -169,25 +193,17 @@ input[type=number]{text-align:center}
 </section>
 
 <section class="page" id="live">
-<div class="grid">
-<div class="panel">
-<h3>進行状況</h3>
-<div id="liveList"></div>
-<div class="total"><span>全体予定</span><b id="ltotal">00:00</b></div>
-<div class="total"><span>全体残り時間</span><b id="elapsed">00:00</b></div>
-</div>
-<div class="panel hero">
+<div class="panel hero live-focus">
 <div class="name" id="name">未開始</div>
 <div class="clock" id="clock">00:00</div>
-<div class="status" id="status">待機中</div><div class="status" id="wallInfo" style="margin-top:5px">現在時刻 --:-- ｜ 予定終了 --:--</div>
-<div class="bar"><div class="fill" id="fill"></div></div>
+<div class="status" id="status">待機中</div>
+<div class="status wall-info" id="wallInfo">現在時刻 --:-- ｜ 予定終了 --:--</div>
 <div class="stats">
 <div class="stat"><small>予定時間</small><b id="planned">00:00</b></div>
 <div class="stat"><small>実経過</small><b id="sectionElapsed">00:00</b></div>
 <div class="stat"><small>全体差分</small><b id="sectionDrift">±00:00</b></div>
 </div>
 <div class="drift" id="overall">全体残り 00:00</div>
-<div class="note" id="note">予定通り</div>
 <div class="actions" style="justify-content:center">
 <button class="main big" id="start">▶ スタート</button>
 <button class="dark" id="prev">← 前へ</button>
@@ -195,7 +211,6 @@ input[type=number]{text-align:center}
 <button class="red" id="reset">リセット</button>
 </div>
 <div class="actions" style="justify-content:center"><button class="dark" id="edit">⚙ 進行表を編集</button></div>
-</div>
 </div>
 </section>
 </div>
@@ -287,11 +302,6 @@ function draw(){
 
   $("total").textContent=fmt(total());
 
-  $("liveList").innerHTML=S.map((x,n)=>
-    `<div class="section ${n===i?"active":""}">
-      <span class="num">${n+1}</span><span>${x[0]}</span><span class="stime">${fmt(effectiveTime(x))}</span>
-    </div>`).join("");
-  $("ltotal").textContent=fmt(total());
 
   live();
 }
@@ -352,21 +362,13 @@ function updatePreview(){
         <span class="num">${n+1}</span><span>${x[0]}</span><span class="stime">${fmt(effectiveTime(x))}</span>
       </div>`).join("");
   }
-  if($("liveList")){
-    $("liveList").innerHTML=S.map((x,n)=>
-      `<div class="section ${n===i?"active":""}">
-        <span class="num">${n+1}</span><span>${x[0]}</span><span class="stime">${fmt(effectiveTime(x))}</span>
-      </div>`).join("");
-  }
   if($("total")) $("total").textContent=fmt(total());
-  if($("ltotal")) $("ltotal").textContent=fmt(total());
 }
 function live(){
  updateWallInfo();
  if(!S.length){
   $("name").textContent="セクションなし";
   $("clock").textContent="00:00";
-  $("elapsed").textContent="00:00";
   $("overall").textContent="全体残り 00:00";
   return;
  }
@@ -387,25 +389,16 @@ function live(){
  $("sectionElapsed").textContent=fmt(elapsedSection);
  $("sectionDrift").textContent=signed(overallDrift);
 
- $("elapsed").textContent=overallRemaining<0
-   ? "-"+fmt(Math.abs(overallRemaining))
-   : fmt(overallRemaining);
-
  $("overall").textContent=overallRemaining<0
    ? "全体残り -"+fmt(Math.abs(overallRemaining))
    : "全体残り "+fmt(overallRemaining);
 
  if(overtime>0){
-   $("note").textContent="予定時間超過";
    $("status").textContent="オーバーラン";
  }else{
-   $("note").textContent=overallRemaining<0
-     ? "全体予定時間を超過"
-     : "全体残り "+fmt(overallRemaining);
    $("status").textContent=running?"進行中":"待機中";
  }
 
- $("fill").style.width=(p?Math.max(0,Math.min(1,left/p))*100:0)+"%";
 
  const clock=$("clock");
  clock.className="clock";

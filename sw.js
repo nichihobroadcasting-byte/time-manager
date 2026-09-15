@@ -1,4 +1,4 @@
-const CACHE_NAME = "time-manager-v21";
+const CACHE_NAME = "time-manager-v22";
 const APP_SHELL = [
   "./",
   "./index.html",
