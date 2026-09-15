@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0d0d0d">
-<title>TIME MANAGER V24</title>
+<title>TIME MANAGER V23</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0d;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
@@ -44,7 +44,7 @@ input[type=number]{text-align:center}
 .total{display:flex;justify-content:space-between;color:#aaa;padding-top:13px}
 .big{font-size:18px;padding:15px 22px}
 .toggle{color:#999;font-size:13px;display:block;margin-top:12px}
-@media(max-width:800px){.grid{grid-template-columns:1fr}.clock{font-size:70px}.stats{grid-template-columns:1fr 1fr}.row,.input-labels{grid-template-columns:1fr 58px 58px 40px}}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.clock{font-size:70px}.stats{grid-template-columns:1fr 1fr}.row,.input-labels{grid-template-columns:minmax(0,1fr) 50px 50px 96px}.row-actions{gap:5px}.row-actions button{min-width:28px;padding:7px 8px}}
 .adj{width:90px!important;min-width:90px}.fix{display:flex;align-items:center;gap:4px;white-space:nowrap}.fixcheck{width:auto!important}.row.head{font-size:12px;opacity:.7}
 
 /* V19: field-use priority fixes */
@@ -155,6 +155,24 @@ input[type=number]{text-align:center}
   .hero .actions:last-child button{padding:6px 9px;font-size:10px}
 }
 
+
+/* V25: setup screen is intentionally single-column in landscape for easier field operation. */
+@media (orientation: landscape) and (max-width: 950px){
+  body{overflow-y:auto;overflow-x:hidden}
+  .app{height:auto;min-height:100vh}
+  #setup{height:auto;min-height:0;overflow:visible}
+  #setup .grid{height:auto;min-height:0;overflow:visible;display:grid;grid-template-columns:1fr;gap:10px}
+  #setup .grid>.panel{min-height:0;overflow:visible}
+  #setup .panel:first-child,#setup .panel:nth-child(2){overflow:visible}
+  #setup .setup-panel{max-height:none}
+  #setup .setup-actions{position:sticky;bottom:0}
+}
+@media (orientation: landscape) and (max-width: 700px){
+  .app{padding-bottom:12px}
+  #setup .grid{grid-template-columns:1fr;gap:8px}
+  #setup .panel{padding:8px}
+}
+
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#0b0f14">
@@ -165,7 +183,7 @@ input[type=number]{text-align:center}
 </head>
 <body>
 <div class="app">
-<h1>TIME MANAGER / V24</h1>
+<h1>TIME MANAGER / V25</h1>
 <div class="tabs"><button class="main" id="setupTab">進行表設定</button><button class="dark" id="liveTab">本番画面</button></div>
 
 <section class="page on" id="setup">
@@ -592,19 +610,9 @@ reset();
 <script>
 if ("serviceWorker" in navigator &&
     (location.protocol === "http:" || location.protocol === "https:")) {
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (!window.__tmSwReloaded) {
-      window.__tmSwReloaded = true;
-      location.reload();
-    }
-  });
-  window.addEventListener("load", async () => {
-    try {
-      const reg = await navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" });
-      await reg.update();
-    } catch (err) {
-      console.warn("Offline cache registration failed:", err);
-    }
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch(err => console.warn("Offline cache registration failed:", err));
   });
 }
 </script>
